@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+	<title></title>
+	<meta name="generator" content="LibreOffice 25.8.4.2 (Linux)"/>
+	<meta name="created" content="00:00:00"/>
+	<meta name="changed" content="00:00:00"/>
+	<style type="text/css">
+		@page { size: 8.27in 11.69in; margin: 0.79in }
+		p { margin-bottom: 0.1in; line-height: 115%; background: transparent }
+		pre { font-size: 10pt; font-family: "Liberation Mono", monospace; background: transparent }
+	</style>
+</head>
+<body lang="en-US" link="#000080" vlink="#800000" dir="ltr"><pre>&lt;html&gt;
+&lt;head&gt;
+&lt;title&gt;WFH Calculator&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;b&gt;Employee Time Calculator&lt;/b&gt;&lt;br&gt;&lt;br&gt;
+&lt;lable&gt; IN Time:&lt;/lable&gt;
+&lt;input type=&quot;time&quot; id=&quot;inTime&quot;&gt; &lt;br&gt;&lt;br&gt;
+&lt;lable&gt; OUT Time:&lt;/lable&gt;
+&lt;input type=&quot;time&quot; id=&quot;outTime&quot;&gt; &lt;br&gt;&lt;br&gt;
+
+&lt;button onclick=&quot;calculateTime()&quot;&gt;Calculate&lt;/button&gt;
+&lt;p id=&quot;worked&quot;&gt;&lt;/p&gt;
+
+&lt;p id=&quot;difference&quot;&gt;&lt;/p&gt;
+
+&lt;p id=&quot;interval&quot;&gt;&lt;/p&gt;
+
+&lt;p id=&quot;intervals&quot;&gt;&lt;/p&gt;
+
+&lt;script&gt;
+function calculateTime(){
+var inTime= document.getElementById(&quot;inTime&quot;).value;
+var outTime= document.getElementById(&quot;outTime&quot;).value;
+
+// *****Difference from IN and OUT ****//
+if(!inTime || !outTime){
+document.getElementById(&quot;result&quot;).innerText=&quot;Please enter times&quot;;
+return;
+}
+
+var inDate = new Date(&quot;1970-01-01T&quot; + inTime+ &quot;:00&quot;);
+var outDate = new Date(&quot;1970-01-01T&quot; + outTime+ &quot;:00&quot;);
+
+var diffMs = outDate - inDate;
+if(diffMs &lt; 0){
+document.getElementById(&quot;result&quot;).innerText=&quot;OutTime is lesser than InTime&quot;;
+return;
+}
+
+var diffHours = Math.floor(diffMs/ (1000*60*60));
+var diffMins= Math.floor((diffMs % (1000*60*60))/ (1000*60));
+
+document.getElementById(&quot;worked&quot;).innerText =
+&quot;Worked Time: &quot; + diffHours + &quot;hours &quot; + diffMins + &quot;minutes&quot;;
+
+// *****Difference from 9:15 ****//
+var workedMins = diffMs / (1000*60);
+var requiredMins = (9*60)+15;
+
+var differenceMinutes = requiredMins - workedMins;
+
+if(differenceMinutes &gt;0){
+var hours = Math.floor(differenceMinutes/60);
+var minutes = Math.floor(differenceMinutes%60);
+
+document.getElementById(&quot;difference&quot;).innerText =
+&quot;Remaining Time: &quot; + hours + &quot;hours &quot; + minutes + &quot;minutes&quot;;
+}
+
+// *****Remaining Interval from 9:15 ****//
+var startWFH = new Date(outDate.getTime() + (1*60000));
+var endWFH = new Date(startWFH.getTime() + (differenceMinutes * 60000));
+
+function formatTime(date){
+var hours1 = date.getHours().toString().padStart(2, '0');
+var minutes1 = date.getMinutes().toString().padStart(2, '0');
+return hours1 + &quot;:&quot; + minutes1;
+}
+document.getElementById(&quot;interval&quot;).innerText =
+&quot;Exact WFH Interval Time: &quot; + formatTime(startWFH) + &quot; to &quot; + formatTime(endWFH);
+
+// *****Catchy Interval for 9:15 ****//
+
+function roundQuarter(date){
+let mins = date.getMinutes();
+let remainder = 15-(mins%15);
+if(remainder === 15) remainder =0;
+let newDate = new Date(date.getTime() + remainder *60000);
+newDate.setSeconds(0);
+return newDate;
+}
+
+let options = &quot;&quot;;
+let baseStart = new Date(outDate);
+
+for(let i=1; i&lt;=3; i++)
+{
+let tempStart = new Date(baseStart.getTime() + i*15 *60000);
+roundStart = roundQuarter(tempStart);
+
+let tempEnd = new Date(roundStart.getTime() + differenceMinutes *60000);
+roundEnd = roundQuarter(tempEnd);
+
+const intervalMinutes = Math.floor((roundEnd - roundStart)/60000);
+const totalMinutes = workedMins + intervalMinutes;
+const totalHours = Math.floor(totalMinutes/60);
+const totalMins = totalMinutes % 60;
+
+options += formatTime(roundStart) + &quot; to &quot; + formatTime(roundEnd) + 
+ &quot; -&gt;Total Hours you Covered: &quot; +totalHours+ &quot; h &quot; + totalMins+ &quot; min&lt;br&gt;&quot;;
+}
+document.getElementById(&quot;intervals&quot;).innerHTML =
+&quot;Suggested WFH Interval Time: &lt;br&gt;&quot; + options;
+
+}
+&lt;/script&gt;
+&lt;script&gt;
+document.addEventListener(&quot;contextmenu&quot;, e =&gt; {
+e.preventDefault();
+});
+
+document.addEventListener(&quot;keydown&quot;, e =&gt; {
+if(
+(e.ctrlKey &amp;&amp; e.key === &quot;u&quot;) ||
+(e.ctrlKey &amp;&amp; e.key === &quot;s&quot;) ||
+(e.ctrlKey &amp;&amp; e.key === &quot;c&quot;) ||
+e.key === &quot;F12&quot;)
+{e.preventDefault();
+}
+});
+&lt;/script&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+</body>
+</html>
